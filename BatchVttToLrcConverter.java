@@ -23,20 +23,30 @@ public class BatchVttToLrcConverter {
         String inputFolder = "file_input_dir"; // 输入文件夹路径
         String outputFolder = "file_output_dir"; // 输出文件夹路径
 
+        File topFolder = new File(inputFolder);
+        convertVttFilesInFolder(topFolder, outputFolder);
 
-        File inputDir = new File(inputFolder);
-        File[] vttFiles = inputDir.listFiles((dir, name) -> name.endsWith(".vtt"));
+        System.out.println("批量转换完成。");
+    }
 
-        if (vttFiles == null) {
-            System.err.println("无法读取输入文件夹或没有找到.vtt文件。");
+    private static void convertVttFilesInFolder(File folder, String outputFolder) {
+        File[] files = folder.listFiles();
+
+        if (files == null) {
+            System.err.println("无法读取文件夹或文件夹为空。");
             return;
         }
 
-        for (File vttFile : vttFiles) {
-            convertVttToLrc(vttFile, outputFolder);
+        for (File file : files) {
+            if (file.isDirectory()) {
+                // 如果是子文件夹，递归处理
+                String subOutputFolder = outputFolder + File.separator + file.getName();
+                convertVttFilesInFolder(file, subOutputFolder);
+            } else if (file.getName().endsWith(".vtt")) {
+                // 如果是VTT文件，进行转换
+                convertVttToLrc(file, outputFolder);
+            }
         }
-
-        System.out.println("批量转换完成。");
     }
 
     private static void convertVttToLrc(File vttFile, String outputFolder) {
