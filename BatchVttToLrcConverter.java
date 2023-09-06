@@ -20,7 +20,6 @@ import java.io.BufferedWriter;
 
 public class BatchVttToLrcConverter {
     public static void main(String[] args) {
-
         String inputFolder = "file_input_dir"; // 输入文件夹路径
         String outputFolder = "file_output_dir"; // 输出文件夹路径
 
