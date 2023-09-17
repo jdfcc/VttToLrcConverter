@@ -1,4 +1,3 @@
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,23 +17,39 @@ import java.io.BufferedWriter;
  * @DateTime 2023/9/5 11:11
  */
 
+
 public class BatchVttToLrcConverter {
+
+    private static int count = 0;
+
     public static void main(String[] args) {
-        String inputFolder = "file_input_dir"; // 输入文件夹路径
-        String outputFolder = "file_output_dir"; // 输出文件夹路径
+        String inputFolder = "file_path"; // 输入文件夹路径
+        String outputFolder = inputFolder; // 输出文件夹路径
+
+
+        if (args.length != 0) {        // 提取目录路径
+            inputFolder = args[0].replace("\\", "\\\\"); // 去掉 "dir=" 前缀
+            outputFolder = inputFolder;
+            System.out.println("指定的目录路径是: " + inputFolder);
+        }
+
 
         File topFolder = new File(inputFolder);
-        convertVttFilesInFolder(topFolder, outputFolder);
+        boolean isSuccessful = convertVttFilesInFolder(topFolder, outputFolder);
 
-        System.out.println("批量转换完成。");
+        if (isSuccessful) {
+            System.out.println("批量转换完成,共转换了" + count + "条");
+            return;
+        }
+        System.out.println("批量转换失败");
     }
 
-    private static void convertVttFilesInFolder(File folder, String outputFolder) {
+    private static boolean convertVttFilesInFolder(File folder, String outputFolder) {
         File[] files = folder.listFiles();
 
         if (files == null) {
             System.err.println("无法读取文件夹或文件夹为空。");
-            return;
+            return false;
         }
 
         for (File file : files) {
@@ -47,6 +62,7 @@ public class BatchVttToLrcConverter {
                 convertVttToLrc(file, outputFolder);
             }
         }
+        return true;
     }
 
     private static void convertVttToLrc(File vttFile, String outputFolder) {
@@ -78,6 +94,9 @@ public class BatchVttToLrcConverter {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        count++;
     }
+
+
 }
 
