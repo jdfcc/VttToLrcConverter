@@ -1,14 +1,7 @@
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-
-import java.io.File;
-import java.io.BufferedWriter;
 
 /**
  * @author Jdfcc
@@ -66,11 +59,11 @@ public class BatchVttToLrcConverter {
     }
 
     private static void convertVttToLrc(File vttFile, String outputFolder) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(vttFile))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(vttFile), StandardCharsets.UTF_8))) {
             String lrcFileName = vttFile.getName().replace(".vtt", ".lrc");
             File lrcFile = new File(outputFolder, lrcFileName);
 
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(lrcFile))) {
+            try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(lrcFile), StandardCharsets.UTF_8))) {
                 String line;
                 String currentTime = "";
                 Pattern timePattern = Pattern.compile("(\\d{2}:\\d{2}:\\d{2}\\.\\d{3}) -->");
