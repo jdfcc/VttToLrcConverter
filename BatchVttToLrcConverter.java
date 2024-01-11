@@ -16,7 +16,7 @@ public class BatchVttToLrcConverter {
     private static int count = 0;
 
     public static void main(String[] args) {
-        String inputFolder = "file_path"; // 输入文件夹路径
+        String inputFolder = "C:\\Users\\Jdfcc\\Downloads\\114524"; // 输入文件夹路径
         String outputFolder = inputFolder; // 输出文件夹路径
 
 
@@ -58,37 +58,50 @@ public class BatchVttToLrcConverter {
         return true;
     }
 
-    private static void convertVttToLrc(File vttFile, String outputFolder) {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(vttFile), StandardCharsets.UTF_8))) {
-            String lrcFileName = vttFile.getName().replace(".vtt", ".lrc");
-            File lrcFile = new File(outputFolder, lrcFileName);
+private static void convertVttToLrc(File vttFile, String outputFolder) {
+    try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(vttFile), StandardCharsets.UTF_8))) {
+        String lrcFileName = vttFile.getName().replace(".vtt", ".lrc");
+        File lrcFile = new File(outputFolder, lrcFileName);
 
-            try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(lrcFile), StandardCharsets.UTF_8))) {
-                String line;
-                String currentTime = "";
-                Pattern timePattern = Pattern.compile("(\\d{2}:\\d{2}:\\d{2}\\.\\d{3}) -->");
+        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(lrcFile), StandardCharsets.UTF_8))) {
+            String line;
+            Pattern timePattern = Pattern.compile("(\\d{2}):(\\d{2}):(\\d{2})\\.(\\d{3}) --> (\\d{2}):(\\d{2}):(\\d{2})\\.(\\d{3})");
 
-                while ((line = reader.readLine()) != null) {
-                    if (line.matches("\\d+")) {
-                        // 如果行只包含数字，跳过该行（标识段落的数字）
-                        continue;
-                    } else if (line.contains("-->")) {
-                        // 匹配VTT格式的时间戳，提取第一个时间
-                        Matcher matcher = timePattern.matcher(line);
-                        if (matcher.find()) {
-                            currentTime = "[" + matcher.group(1) + "]";
-                        }
-                    } else if (!line.isEmpty()) {
+            while ((line = reader.readLine()) != null) {
+                if (line.matches("\\d+")) {
+                    // 如果行只包含数字，跳过该行（标识段落的数字）
+                    continue;
+                } else if (line.matches("^\\s*WEBVTT(?=\\s*(?:\\d{2}:\\d{2}:\\d{2}.\\d{3}\\s*-->\\s*\\d{2}:\\d{2}:\\d{2}.\\d{3}\\s*)|$)")) {
+
+                } else if (line.contains("-->")) {
+                    // 匹配VTT格式的时间戳，提取开始时间
+                    Matcher matcher = timePattern.matcher(line);
+                    if (matcher.find()) {
+                        // 计算开始时间的总秒数
+                        int startHours = Integer.parseInt(matcher.group(1));
+                        int startMinutes = Integer.parseInt(matcher.group(2));
+                        int startSeconds = Integer.parseInt(matcher.group(3));
+                        int startMillis = Integer.parseInt(matcher.group(4));
+
+                        int startTimeInSeconds = startHours * 3600 + startMinutes * 60 + startSeconds + startMillis / 1000;
+
+                        // 将秒数格式化成 [mm:ss.SSS]
+                        String currentTime = String.format("[%02d:%02d.%03d]", startTimeInSeconds / 60, startTimeInSeconds % 60, startMillis);
+
                         // 写入LRC格式的歌词行
-                        writer.write(currentTime + line + "\n");
+                        writer.write(currentTime);
                     }
+                } else if (!line.isEmpty()) {
+                    // 写入歌词内容
+                    writer.write(line + "\n");
                 }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
-        count++;
+    } catch (IOException e) {
+        e.printStackTrace();
     }
+}
+
 
 
 }
