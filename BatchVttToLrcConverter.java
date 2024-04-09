@@ -1,5 +1,6 @@
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -13,7 +14,20 @@ import java.util.regex.Pattern;
 
 public class BatchVttToLrcConverter {
 
+    /**
+     * 转换的文件数量
+     */
     private static int count = 0;
+
+    /**
+     * 处于此set中的新的歌词文件的后缀将会被自动替换掉
+     */
+    private static final HashSet<String> SUFFIXS = new HashSet<String>() {{
+        add("mp3");
+        add("mp4");
+        add("wav");
+        add("flac");
+    }};
 
     public static void main(String[] args) {
         String inputFolder = "C:\\Users\\Jdfcc\\Downloads\\114524"; // 输入文件夹路径
@@ -61,6 +75,14 @@ public class BatchVttToLrcConverter {
     private static void convertVttToLrc(File vttFile, String outputFolder) {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(vttFile), StandardCharsets.UTF_8))) {
             String lrcFileName = vttFile.getName().replace(".vtt", ".lrc");
+            // handle the file name
+            String[] split = lrcFileName.split("\\.");
+            if (SUFFIXS.contains(split[split.length - 2])) {
+                System.out.print("更改后的文件名："+lrcFileName);
+                lrcFileName = lrcFileName.replace("." + split[split.length - 2], "");
+                System.out.println("被重新命名为-----> "+lrcFileName);
+            }
+
             File lrcFile = new File(outputFolder, lrcFileName);
             try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(lrcFile), StandardCharsets.UTF_8))) {
                 String line;
