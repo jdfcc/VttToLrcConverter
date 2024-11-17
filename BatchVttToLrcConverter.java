@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 public class BatchVttToLrcConverter {
 
     /**
-     * 转换的文件数量
+     * 转换的文件数量123
      */
     private static int count = 0;
 
