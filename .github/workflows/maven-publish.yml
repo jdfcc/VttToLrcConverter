@@ -20,4 +20,4 @@ jobs:
         run: javac BatchVttToLrcConverter.java
 
       - name: Run Java file
-        run: java Main
+        run: java BatchVttToLrcConverter
