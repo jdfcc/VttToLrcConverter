@@ -31,12 +31,14 @@ public class BatchVttToLrcConverter {
     }};
 
     public static void main(String[] args) {
-        String inputFolder = "C:\\Users\\Jdfcc\\Downloads\\114524"; // 输入文件夹路径
-        String outputFolder = inputFolder; // 输出文件夹路径
+        String inputFolder = "";
+        String outputFolder = inputFolder;
+        if (inputFolder.isEmpty()) {
+            return;
+        }
 
-
-        if (args.length != 0) {        // 提取目录路径
-            inputFolder = args[0].replace("\\", "\\\\"); // 去掉 "dir=" 前缀
+        if (args.length != 0) {
+            inputFolder = args[0].replace("\\", "\\\\");
             outputFolder = inputFolder;
             System.out.println("指定的目录路径是: " + inputFolder);
         }
@@ -90,24 +92,13 @@ public class BatchVttToLrcConverter {
                 Pattern timePattern = Pattern.compile("(\\d{2}):(\\d{2}):(\\d{2})\\.(\\d{3}) --> (\\d{2}):(\\d{2}):(\\d{2})\\.(\\d{3})");
                 while ((line = reader.readLine()) != null) {
                     if (line.matches("\\d+")) {
-                        // 如果行只包含数字，跳过该行（标识段落的数字）
                     } else if (line.matches("^\\s*WEBVTT(?=\\s*(?:\\d{2}:\\d{2}:\\d{2}.\\d{3}\\s*-->\\s*\\d{2}:\\d{2}:\\d{2}.\\d{3}\\s*)|$)")) {
                     } else if (line.contains("-->")) {
                         // 匹配VTT格式的时间戳，提取开始时间
                         Matcher matcher = timePattern.matcher(line);
                         if (matcher.find()) {
-                            // 计算开始时间的总秒数
-                            int startHours = Integer.parseInt(matcher.group(1));
-                            int startMinutes = Integer.parseInt(matcher.group(2));
-                            int startSeconds = Integer.parseInt(matcher.group(3));
-                            int startMillis = Integer.parseInt(matcher.group(4));
+                            String currentTime = getString(matcher);
 
-                            int startTimeInSeconds = startHours * 3600 + startMinutes * 60 + startSeconds + startMillis / 1000;
-
-                            // 将秒数格式化成 [mm:ss.SSS]
-                            String currentTime = String.format("[%02d:%02d.%03d]", startTimeInSeconds / 60, startTimeInSeconds % 60, startMillis);
-
-                            // 写入LRC格式的歌词行
                             writer.write(currentTime);
 
                         }
@@ -121,6 +112,17 @@ public class BatchVttToLrcConverter {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private static String getString(Matcher matcher) {
+        int startHours = Integer.parseInt(matcher.group(1));
+        int startMinutes = Integer.parseInt(matcher.group(2));
+        int startSeconds = Integer.parseInt(matcher.group(3));
+        int startMillis = Integer.parseInt(matcher.group(4));
+
+        int startTimeInSeconds = startHours * 3600 + startMinutes * 60 + startSeconds + startMillis / 1000;
+
+        return String.format("[%02d:%02d.%03d]", startTimeInSeconds / 60, startTimeInSeconds % 60, startMillis);
     }
 
 
